@@ -20,7 +20,9 @@ parts/
 sdist/
 var/
 wheels/
+dataset/
 share/python-wheels/
+api/.gradio/
 *.egg-info/
 .installed.cfg
 *.egg
