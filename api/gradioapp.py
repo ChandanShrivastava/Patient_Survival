@@ -48,4 +48,4 @@ iface = gr.Interface(fn = predict_death_event,
     description = description,
     allow_flagging='never')
 
-iface.launch(share=True,server_port=8001)  # server_name="0.0.0.0", server_port = 8001   # Ref: https://www.gradio.app/docs/interface
+iface.launch(share=True,server_name="0.0.0.0",server_port=8001)  # server_name="0.0.0.0", server_port = 8001   # Ref: https://www.gradio.app/docs/interface
