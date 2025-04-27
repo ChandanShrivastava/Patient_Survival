@@ -18,7 +18,7 @@ COPY model/xgboost-model.pkl /app/model/xgboost-model.pkl
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Expose the port Gradio will run on
-EXPOSE 7860
+EXPOSE 8001
 
 # Command to run the Gradio app
 CMD ["python", "/app/api/gradioapp.py"]
