@@ -1,11 +1,13 @@
-
 import joblib
 import numpy as np
 import gradio as gr
-import sys
-from pathlib import Path
-from prometheus_client import start_http_server, Counter
+from fastapi import FastAPI
+from prometheus_client import Counter, generate_latest
+from prometheus_client import CONTENT_TYPE_LATEST
+from fastapi.responses import Response
+from fastapi.middleware.wsgi import WSGIMiddleware
 import threading
+from pathlib import Path
 
 # Define a Prometheus counter
 prediction_counter = Counter('predictions_total', 'Total number of predictions made')
@@ -16,30 +18,24 @@ model_path = Path(__file__).resolve().parents[1] / 'model' / 'xgboost-model.pkl'
 # Load the model using the absolute path
 xgb_clf = joblib.load(str(model_path))
 
-
 # Function for prediction
-
 def predict_death_event(age, anaemia, high_blood_pressure, creatinine_phosphokinase, diabetes, ejection_fraction, platelets, sex, serum_creatinine, serum_sodium, smoking, time):
-  """Predicts the survival of a patient with heart failure."""
-  inputdata = np.array([age, anaemia, high_blood_pressure, creatinine_phosphokinase, diabetes, ejection_fraction, platelets, sex, serum_creatinine, serum_sodium, smoking, time]).reshape(1, -1)
-  # Make prediction using the trained model
-  prediction = xgb_clf.predict(inputdata)
-  if prediction[0] == 0:
-    return "Patient is predicted to survive."
-  else:
-    return "Patient is predicted to not survive."
+    """Predicts the survival of a patient with heart failure."""
+    prediction_counter.inc()  # Increment the Prometheus counter
+    inputdata = np.array([age, anaemia, high_blood_pressure, creatinine_phosphokinase, diabetes, ejection_fraction, platelets, sex, serum_creatinine, serum_sodium, smoking, time]).reshape(1, -1)
+    # Make prediction using the trained model
+    prediction = xgb_clf.predict(inputdata)
+    if prediction[0] == 0:
+        return "Patient is predicted to survive."
+    else:
+        return "Patient is predicted to not survive."
 
-# Start a Prometheus metrics server on a separate thread
-def start_metrics_server():
-    start_http_server(8001)  # Expose metrics on port 8000
-
-threading.Thread(target=start_metrics_server, daemon=True).start()
-
-# Gradio interface to generate UI link
+# Gradio interface
 title = "Patient Survival Prediction"
 description = "Predict survival of patient with heart failure, given their clinical record"
 
-iface = gr.Interface(fn = predict_death_event,
+iface = gr.Interface(
+    fn=predict_death_event,
     inputs=[
         gr.Slider(minimum=40, maximum=95, step=1, value=60, label="Age"),
         gr.Radio(choices=[0, 1], value=0, label="Anaemia (0=No, 1=Yes)"),
@@ -54,9 +50,20 @@ iface = gr.Interface(fn = predict_death_event,
         gr.Radio(choices=[0, 1], value=0, label="Smoking (0=No, 1=Yes)"),
         gr.Slider(minimum=4, maximum=285, step=1, value=100, label="Time (Follow-up Period)"),
     ],
-    outputs="text",  # Output is a text string (survival prediction)
-    title = title,
-    description = description,
-    allow_flagging='never')
+    outputs="text",
+    title=title,
+    description=description,
+    allow_flagging='never'
+)
 
-iface.launch(share=True,server_name="0.0.0.0",server_port=8001)  # server_name="0.0.0.0", server_port = 8001   # Ref: https://www.gradio.app/docs/interface
+# FastAPI app
+app = FastAPI()
+
+# Add the Gradio app as a WSGI middleware
+app.mount("/gradio", WSGIMiddleware(iface.launch(share=False, server_name="0.0.0.0", inbrowser=False)))
+
+# Add the /metrics endpoint
+@app.get("/metrics")
+def metrics():
+    """Expose Prometheus metrics."""
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
