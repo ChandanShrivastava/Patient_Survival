@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Survival Prediction</title>
+</head>
+<body>
+    <h1>Patient Survival Prediction</h1>
+    <form action="/predict" method="post">
+        <label>Age:</label>
+        <input type="number" name="age" min="40" max="95" step="1" value="60" required><br>
+
+        <label>Anaemia:</label>
+        <input type="radio" name="anaemia" value="0" checked> No
+        <input type="radio" name="anaemia" value="1"> Yes<br>
+
+        <label>High Blood Pressure:</label>
+        <input type="radio" name="high_blood_pressure" value="0" checked> No
+        <input type="radio" name="high_blood_pressure" value="1"> Yes<br>
+
+        <label>Creatinine Phosphokinase (CPK):</label>
+        <input type="number" name="creatinine_phosphokinase" min="23" max="7861" step="1" value="582" required><br>
+
+        <label>Diabetes:</label>
+        <input type="radio" name="diabetes" value="0" checked> No
+        <input type="radio" name="diabetes" value="1"> Yes<br>
+
+        <label>Ejection Fraction:</label>
+        <input type="number" name="ejection_fraction" min="14" max="80" step="1" value="38" required><br>
+
+        <label>Platelets:</label>
+        <input type="number" name="platelets" min="25100" max="850000" step="1" value="265000" required><br>
+
+        <label>Sex:</label>
+        <input type="radio" name="sex" value="0" checked> Female
+        <input type="radio" name="sex" value="1"> Male<br>
+
+        <label>Serum Creatinine:</label>
+        <input type="number" name="serum_creatinine" min="0.5" max="9.4" step="0.1" value="1.1" required><br>
+
+        <label>Serum Sodium:</label>
+        <input type="number" name="serum_sodium" min="113" max="180" step="1" value="136" required><br>
+
+        <label>Smoking:</label>
+        <input type="radio" name="smoking" value="0" checked> No
+        <input type="radio" name="smoking" value="1"> Yes<br>
+
+        <label>Time (Follow-up Period):</label>
+        <input type="number" name="time" min="4" max="285" step="1" value="100" required><br>
+
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>

@@ -5,3 +5,5 @@ xgboost
 joblib
 gradio
 prometheus_client
+fastapi
+requests

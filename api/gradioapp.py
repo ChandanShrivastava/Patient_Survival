@@ -56,14 +56,27 @@ iface = gr.Interface(
     allow_flagging='never'
 )
 
+
 # FastAPI app
 app = FastAPI()
 
 # Add the Gradio app as a WSGI middleware
-app.mount("/gradio", WSGIMiddleware(iface.launch(share=False, server_name="0.0.0.0", inbrowser=False)))
+app.mount("/gradio", WSGIMiddleware(iface.launch(share=True, server_name="0.0.0.0", inbrowser=False)))
 
 # Add the /metrics endpoint
 @app.get("/metrics")
 def metrics():
-    """Expose Prometheus metrics."""
-    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+    """Expose Prometheus metrics and calculate R² metric."""
+    r2_metrics = R2Metrics()  # Initialize the R2Metrics class
+    try:
+        # Calculate R² metric using a random sample
+        r2 = r2_metrics.calculate_r2_from_sample()
+
+        # Include R² metric in Prometheus output
+        r2_metric = f"# HELP r2_metric Coefficient of determination (R²)\n# TYPE r2_metric gauge\nr2_metric {r2}\n"
+        prometheus_metrics = generate_latest().decode("utf-8")
+        return Response(prometheus_metrics + r2_metric, media_type=CONTENT_TYPE_LATEST)
+    except Exception as e:
+        # Handle errors and return Prometheus metrics without R²
+        print(f"Error calculating R² metric: {e}")
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
