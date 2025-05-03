@@ -25,4 +25,5 @@ EXPOSE 8001
 
 # Command to run the Gradio app
 #CMD ["python", "/app/api/gradioapp.py"]
+CMD ["python", "/app/api/r2metrics.py"]
 CMD ["uvicorn", "api.fastapiapp:app", "--host", "0.0.0.0", "--port", "8001"]
