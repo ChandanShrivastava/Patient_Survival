@@ -4,6 +4,11 @@ import numpy as np
 import gradio as gr
 import sys
 from pathlib import Path
+from prometheus_client import start_http_server, Counter
+import threading
+
+# Define a Prometheus counter
+prediction_counter = Counter('predictions_total', 'Total number of predictions made')
 
 # Construct the absolute path to the model file
 model_path = Path(__file__).resolve().parents[1] / 'model' / 'xgboost-model.pkl'
@@ -23,6 +28,12 @@ def predict_death_event(age, anaemia, high_blood_pressure, creatinine_phosphokin
     return "Patient is predicted to survive."
   else:
     return "Patient is predicted to not survive."
+
+# Start a Prometheus metrics server on a separate thread
+def start_metrics_server():
+    start_http_server(8000)  # Expose metrics on port 8000
+
+threading.Thread(target=start_metrics_server, daemon=True).start()
 
 # Gradio interface to generate UI link
 title = "Patient Survival Prediction"

@@ -27,8 +27,10 @@
 name: Deploy to Amazon ECS
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: ["CD Pipeline"]  # Name of the workflow in cd.yml
+    types:
+      - completed
 
 env:
   AWS_REGION: ap-south-1                   # set this to your preferred AWS region, e.g. us-west-1
