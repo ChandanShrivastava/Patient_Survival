@@ -31,7 +31,7 @@ def predict_death_event(age, anaemia, high_blood_pressure, creatinine_phosphokin
 
 # Start a Prometheus metrics server on a separate thread
 def start_metrics_server():
-    start_http_server(8000)  # Expose metrics on port 8000
+    start_http_server(8001)  # Expose metrics on port 8000
 
 threading.Thread(target=start_metrics_server, daemon=True).start()
 
